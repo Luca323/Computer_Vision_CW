@@ -35,8 +35,8 @@ classes = C.classOrder;
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
 
 
-[Xtr1, ytr] = extractTinyImages(imdsTrain, C.thumbnailSize);
-[Xte1, yte] = extractTinyImages(imdsTest,  C.thumbnailSize);
+[Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
+[Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
 
 mdl1Path = fullfile(C.modelCacheDir, 'Task1_kNN_model.mat');
 if exist(mdl1Path, 'file')
