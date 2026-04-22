@@ -43,7 +43,7 @@ if exist(mdl1Path, 'file')
     modelData = load(mdl1Path, 'mdl1');
     mdl1 = modelData.mdl1;
 else
-    mdl1 = trainKNN(Xtr1, ytr); 
+    mdl1 = trainKNN_2(Xtr1, ytr, 10); 
     save(mdl1Path, 'mdl1');
 end
 
