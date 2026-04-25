@@ -1,16 +1,17 @@
 function model = trainSVM(X, y, kernel)
     classes = categories(y);
     numClasses = numel(classes);
+
     model.BinaryModels = cell(numClasses, 1);
     model.ClassNames = classes;
+
     BC = 1;
 
     for i = 1:numClasses
         current = classes{i};
-        binaryLabels = double(y == current);   % 1 where current class, 0 elsewhere
-        binaryLabels(binaryLabels == 0) = -1;  % convert 0s to -1
-        
+        binaryLabels = (y == current);
         model.BinaryModels{i} = fitcsvm(X, binaryLabels, 'KernelFunction', kernel, ...
-            'Standardize', true, 'BoxConstraint', BC);
+            '','BoxConstraint',BC);
     end
+
 end
