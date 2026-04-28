@@ -67,6 +67,7 @@ runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
 % As in Task 1, you need to implement exctractHOG and trainSVM functions.
 % As above you should include more parameters. You should define them in config.
 
+%{
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
     load(mdl2Path,'Xtr2','Xte2','ytr','yte');
@@ -102,6 +103,7 @@ yhat2 = predictSVM(mdl2, Xte2); %Had to write custom prediction script
 
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
+%}
 
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.
