@@ -134,7 +134,7 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
 % SURF features will look very different from a smaller version of the same
 % image.
 
-
+%{
 mdl3Path = fullfile(C.modelCacheDir, 'Task3_bovw_vocab.mat');
 if exist(mdl3Path, 'file')
     load(mdl3Path, 'vocab');
@@ -154,10 +154,10 @@ else
 end
 
 mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel);
-yhat3 = predict(mdl3, Xte3);
+yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
-
+%}
 %% ================= TASK 4 =================
 % As in previous tasks you need to implement trainTranferCNN and predictTransferCNN. 
 % You need to perform experiments demonstrating fine-tuning of the pretrained resnet18 network.
@@ -166,6 +166,8 @@ netStruct = trainTransferCNN(imdsTrain, classes, C);
 yhat4 = predictTransferCNN(netStruct, imdsTest);
 yte = imdsTest.Labels;
 runFullEvaluation(imdsTest, yte, yhat4, classes, "Task4_TransferCNN", C.outDir);
+
+
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
 
