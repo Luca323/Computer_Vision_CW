@@ -1,7 +1,5 @@
-function model = trainKNN(X, y)
+function model = trainKNN(X, y, k)
     
-    t = templateKNN("Distance","euclidean", "NumNeighbors", 10)
-
-    model = fitcknn(X, y, t);
+    model = fitcknn(X, y, 'Distance', 'euclidean', 'NumNeighbors', k);
 
 end
