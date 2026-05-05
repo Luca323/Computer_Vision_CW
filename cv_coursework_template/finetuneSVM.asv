@@ -47,11 +47,11 @@ function bestParams = finetuneSVM(X, y)
                 scores = zeros(numClasses, 1);
 
                 for i = 1:numClasses
-                    mdl = models{i};
+                    model = models{i};
 
                     % Extract W and B
-                    W = mdl.Beta;
-                    B = mdl.Bias;
+                    W = model.Beta;
+                    B = model.Bias;
 
                     % Decision function: W·X + B
                     scores(i) = x * W + B;
@@ -66,15 +66,13 @@ function bestParams = finetuneSVM(X, y)
 
             % accuracy for this fold
             foldAcc(fold) = mean(preds == ytest);
-        end
 
-        acc = mean(foldAcc);
-
-        if acc > bestAcc
-            bestParams.acc = acc;
-            bestParams.boxConstraint = b;
+            acc = mean(foldAcc);
+    
+            if acc > bestAcc
+                bestAcc = acc;
+                bestParams.boxContraint = boxContraints{b};
+            end
         end
     end
-    
-    disp(bestParams)
 end

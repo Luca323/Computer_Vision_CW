@@ -47,11 +47,14 @@ if exist(mdl1Path, 'file')
     mdl1 = modelData.mdl1;
 else
     
-    bestParams = finetuneKNN(Xtr1, ytr);
-    mdl1 = trainKNN_2(Xtr1, ytr, bestParams.distance, bestParams.k);
+    bestParams_knn = finetuneKNN(Xtr1, ytr);
+    mdl1 = trainKNN_2(Xtr1, ytr, bestParams_knn.distance, bestParams_knn.k);
 
     save(mdl1Path, 'mdl1');
 end
+
+yhat1 = predict(mdl1, Xte1);
+runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_kNN", C.outDir);
 
 %{
 mdl1Path = fullfile(C.modelCacheDir, 'Task1_SVM_model.mat');
@@ -62,20 +65,16 @@ else
     mdl1 = trainSVM(Xtr1, ytr);
     save(mdl1Path, 'mdl1');
 end
+
+yhat1 = predict(mdl2, Xte1);
+runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
 %}
-
-yhat1 = predict(mdl1, Xte1);
-runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_kNN", C.outDir);
-
-%yhat1 = predict(mdl2, Xte1);
-%runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
-
 
 %% ================= TASK 2 =================
 % As in Task 1, you need to implement exctractHOG and trainSVM functions.
 % As above you should include more parameters. You should define them in config.
 
-%{
+
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
     load(mdl2Path,'Xtr2','Xte2','ytr','yte');
@@ -84,7 +83,7 @@ else
     [Xte2, yte] = extractHOG(imdsTest,  C.imageSize, C.hog.cellSize);
     save(mdl2Path, 'Xtr2','Xte2','ytr','yte');
 end,
-%}
+
 
 % trainSVM
 % You can use fitcsvm here designed for binary classification. 
@@ -107,13 +106,14 @@ end,
 
 % You shoud use this approach in all places in your coursework where you use SVM.
 
-%{
+best_params_svm = finetuneSVM(Xtr2, ytr);
+disp(best_params_svm)
 mdl2 = trainSVM(Xtr2, ytr, C.svm.kernel);
 yhat2 = predictSVM(mdl2, Xte2); %Had to write custom prediction script
 
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
-%}
+
 
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.

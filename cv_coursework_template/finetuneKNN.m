@@ -1,6 +1,6 @@
-function bestParams = finetuneKNN(X, y);
+function bestParams = finetuneKNN(X, y)
 
-    kValues = [1,3,5,7,9];
+    kValues = [1 3 5 7 9];
     distances = {'euclidean', 'minkowski', 'chebychev'};
     
     bestParams = struct();
@@ -13,7 +13,7 @@ function bestParams = finetuneKNN(X, y);
             mdlCV = fitcknn(X, y, 'NumNeighbors', k, 'Distance', distances{d}, 'CVPartition', cv);
             acc = 1 - kfoldLoss(mdlCV);
             if acc > bestAcc
-                bestAcc = acc;
+                bestParams.acc = acc;
                 bestParams.k = k;
                 bestParams.distance = distances{d};
             end
@@ -21,5 +21,4 @@ function bestParams = finetuneKNN(X, y);
     end
 
     disp(bestParams)
-    disp(bestAcc)
 end
