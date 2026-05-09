@@ -39,8 +39,6 @@ classes = C.classOrder;
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
 
 
-bestParams = finetuneKNN(Xtr1, ytr);
-
 mdl1Path = fullfile(C.modelCacheDir, 'Task1_kNN_model.mat');
 if exist(mdl1Path, 'file')
     modelData = load(mdl1Path, 'mdl1');
@@ -48,6 +46,7 @@ if exist(mdl1Path, 'file')
 else
     
     bestParams_knn = finetuneKNN(Xtr1, ytr);
+    fprintf('Best k=%d, distance=%s\n', bestParams_knn.k, bestParams_knn.distance);
     mdl1 = trainKNN_2(Xtr1, ytr, bestParams_knn.distance, bestParams_knn.k);
 
     save(mdl1Path, 'mdl1');
@@ -181,6 +180,17 @@ runFullEvaluation(imdsTest, yte, yhat4, classes, "Task4_TransferCNN", C.outDir);
 
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
+
+[Xtr5, ytr] = extractLBP(imdsTrain, C.imageSize, C.lbp);
+[Xte5, yte] = extractLBP(imdsTest,  C.imageSize, C.lbp);
+
+mdl5 = trainRF(Xtr5, ytr);
+yhat5 = predictRF(mdl5, Xte5);
+runFullEvaluation()
+runFullEvaluation(imdsTest, yte, yhat5, classes, "Task5_LBP_RF", C.outDir);
+
+
+
 
 %% HELPER FUNCTIONS - no need to edit
 

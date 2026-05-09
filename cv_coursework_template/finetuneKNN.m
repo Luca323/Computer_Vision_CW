@@ -1,5 +1,5 @@
 function bestParams = finetuneKNN(X, y)
-    kValues   = [1 3 5 7 9];
+    kValues   = [1 3 5 7 9 11 13];
     distances = {'euclidean', 'minkowski', 'chebychev'};
     bestParams = struct();
     bestAcc    = 0;
@@ -16,7 +16,7 @@ function bestParams = finetuneKNN(X, y)
             acc = 1 - kfoldLoss(mdlCV);
             fprintf('k=%d, distance=%s, acc=%.4f\n', k, distances{d}, acc);
             
-            if acc > bestAcc
+            if acc > bestAcc || (acc == bestAcc && k > bestParams.k)
                 bestAcc            = acc;   % ← fix
                 bestParams.acc     = acc;
                 bestParams.k       = k;
