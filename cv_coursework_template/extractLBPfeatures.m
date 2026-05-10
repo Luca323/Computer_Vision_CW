@@ -22,7 +22,7 @@ function [features, labels] = extractLBP(imds, imageSize, lbp_params)
     features = zeros(numImages, numFeatures);
     features(1,:) = sampleFeatures;
 
-    for i = 2:numFeatures
+    for i = 2:numImages
         img = readimage(imds, i);
         img = imresize(img, imageSize);
 

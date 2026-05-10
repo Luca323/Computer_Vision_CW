@@ -33,7 +33,7 @@ classes = C.classOrder;
 % you should not enable OptimizeHyperparameters (keep it disabled as it is by default).
 % Your fine-tuning should be done using cross-validation on a training set part of the dataset.
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
-
+%{
 
 [Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
@@ -55,6 +55,7 @@ end
 yhat1 = predict(mdl1, Xte1);
 runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_kNN", C.outDir);
 
+%}
 %{
 mdl1Path = fullfile(C.modelCacheDir, 'Task1_SVM_model.mat');
 if exist(mdl1Path, 'file')
@@ -73,7 +74,7 @@ runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
 % As in Task 1, you need to implement exctractHOG and trainSVM functions.
 % As above you should include more parameters. You should define them in config.
 
-
+%{
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
     load(mdl2Path,'Xtr2','Xte2','ytr','yte');
@@ -112,7 +113,7 @@ yhat2 = predictSVM(mdl2, Xte2); %Had to write custom prediction script
 
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
-
+%}
 
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.
@@ -181,12 +182,14 @@ runFullEvaluation(imdsTest, yte, yhat4, classes, "Task4_TransferCNN", C.outDir);
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
 
-[Xtr5, ytr] = extractLBP(imdsTrain, C.imageSize, C.lbp);
-[Xte5, yte] = extractLBP(imdsTest,  C.imageSize, C.lbp);
+fprintf("Task 5")
+C.lbp = struct('numNeighbours', 24, 'radius', 3, 'upright', false);
+[Xtr5, ytr] = extractLBPfeatures(imdsTrain, C.imageSize, C.lbp);
+[Xte5, yte] = extractLBPfeatures(imdsTest,  C.imageSize, C.lbp);
 
-mdl5 = trainRF(Xtr5, ytr);
-yhat5 = predictRF(mdl5, Xte5);
-runFullEvaluation()
+mdl5 = TrainRandomForest(Xtr5, ytr);
+yhat5 = PredictRF(mdl5, Xte5);
+
 runFullEvaluation(imdsTest, yte, yhat5, classes, "Task5_LBP_RF", C.outDir);
 
 
