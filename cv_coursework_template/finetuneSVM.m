@@ -1,6 +1,6 @@
 function bestParams = finetuneSVM(X, y)
 
-    boxContraints = [0.01 0.1 1 10 100];
+    boxContraints = [0.1 1 10];
     
     bestParams = struct();
     bestAcc = 0;
@@ -27,42 +27,20 @@ function bestParams = finetuneSVM(X, y)
             Xtest = X(testIdx, :);
             ytest = y(testIdx);
             
-            models = cell(numClasses, 1);
+            modelStruct.BinaryModels = cell(numClasses, 1);
+            modelStruct.ClassNames = classes;
+
             for i = 1:numClasses
                 current = classes{i};
                 binaryLabels = double(ytrain == current);   % 1 where current class, 0 elsewhere
                 binaryLabels(binaryLabels == 0) = -1;  % convert 0s to -1
                 
-                models{i} = fitcsvm(Xtrain, binaryLabels, 'KernelFunction', 'linear', ...
+                modelStruct.BinaryModels{i} = fitcsvm(Xtrain, binaryLabels, 'KernelFunction', 'linear', ...
                     'Standardize', true, 'BoxConstraint', b);
             end
 
-            numTest = size(Xtest, 1);
-            preds = zeros(numTest, 1);
+            preds = predictSVM(modelStruct, Xtest);
 
-            for n = 1:numTest
-
-                x = Xtest(n, :);
-
-                scores = zeros(numClasses, 1);
-
-                for i = 1:numClasses
-                    mdl = models{i};
-
-                    % Extract W and B
-                    W = mdl.Beta;
-                    B = mdl.Bias;
-
-                    % Decision function: W·X + B
-                    scores(i) = x * W + B;
-                end
-
-                % Winner-takes-all
-                [~, idx] = max(scores);
-                preds(n) = idx;
-            end
-
-            preds = categorical(preds, 1:numClasses, classes);
 
             % accuracy for this fold
             foldAcc(fold) = mean(preds == ytest);
@@ -70,11 +48,15 @@ function bestParams = finetuneSVM(X, y)
 
         acc = mean(foldAcc);
 
+        fprintf('boxConstraint=%.2f, acc=%.4f\n', b, acc);
+
+
         if acc > bestAcc
+            bestAcc = acc;
             bestParams.acc = acc;
             bestParams.boxConstraint = b;
         end
     end
     
-    disp(bestParams)
+    fprintf('Best: boxConstraint=%.2f, acc=%.4f\n', bestParams.boxConstraint, bestParams.acc);
 end
