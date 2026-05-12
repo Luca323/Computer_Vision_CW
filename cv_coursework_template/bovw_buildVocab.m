@@ -16,7 +16,6 @@ function vocab = bovw_buildVocab(imds, imgSize, bovw)
         [rows, cols] = size(img);
         [X, Y] = meshgrid(1:step:cols, 1:step:rows);
         
-        % SURFPoints needs Scale specified - this is the common fix
         pts = SURFPoints([X(:), Y(:)], 'Scale', 4);
         
         if pts.Count == 0

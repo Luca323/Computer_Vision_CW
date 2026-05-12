@@ -33,8 +33,8 @@ classes = C.classOrder;
 % you should not enable OptimizeHyperparameters (keep it disabled as it is by default).
 % Your fine-tuning should be done using cross-validation on a training set part of the dataset.
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
-
 %{
+fprintf('Task 1')
 [Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
 
@@ -54,27 +54,29 @@ end
 
 yhat1 = predict(mdl1, Xte1);
 runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_kNN", C.outDir);
-%}
 
-%{
+
 mdl1Path = fullfile(C.modelCacheDir, 'Task1_SVM_model.mat');
 if exist(mdl1Path, 'file')
     modelData = load(mdl1Path, 'mdl1');
     mdl1 = modelData.mdl1;
 else
-    mdl1 = trainSVM(Xtr1, ytr);
+    best_params = finetuneSVM(Xtr1, ytr);
+    mdl1 = trainSVM(Xtr1, ytr, C.svm.kernel, best_params.boxConstraint);
     save(mdl1Path, 'mdl1');
 end
 
-yhat1 = predict(mdl2, Xte1);
+yhat1 = predictSVM(mdl1, Xte1);
 runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
-%}
 
+%}
 %% ================= TASK 2 =================
 % As in Task 1, you need to implement exctractHOG and trainSVM functions.
 % As above you should include more parameters. You should define them in config.
 
-
+%{
+fprintf('Task 2')
+fprintf('Extracting HOG Features...')
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
     load(mdl2Path,'Xtr2','Xte2','ytr','yte');
@@ -106,14 +108,26 @@ end
 
 % You shoud use this approach in all places in your coursework where you use SVM.
 
+
+fprintf("Fine-Tuning SVM...")
 best_params_svm = finetuneSVM(Xtr2, ytr);
 disp(best_params_svm)
-mdl2 = trainSVM(Xtr2, ytr, C.svm.kernel);
+fprintf("Evaluating...")
+mdl2 = trainSVM(Xtr2, ytr,C.svm.kernel, best_params_svm.boxConstraint);
 yhat2 = predictSVM(mdl2, Xte2); %Had to write custom prediction script
 
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
 
+fprintf("Fine-Tuning KNN...")
+best_params_knn = finetuneKNN(Xtr2, ytr);
+disp(best_params_svm)
+
+mdl2 = trainKNN_2(Xtr2, ytr, best_params_knn.distance, best_params_knn.k);
+yhat2 = predict(mdl2, Xte2);
+
+runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
+%}
 
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.
@@ -144,16 +158,18 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
 % SURF features will look very different from a smaller version of the same
 % image.
 
-%{
+
 mdl3Path = fullfile(C.modelCacheDir, 'Task3_bovw_vocab.mat');
 if exist(mdl3Path, 'file')
     load(mdl3Path, 'vocab');
 else
+
     vocab = bovw_buildVocab(imdsTrain, C.imageSize, C.bovw);
     save(mdl3Path, 'vocab');
 end
 
 mdl31Path = fullfile(C.modelCacheDir, 'Task3_bovw_features.mat');
+
 if exist(mdl31Path, 'file')
     load(mdl31Path, 'Xtr3','Xte3','ytr','yte');
     extrData3 = data3.extrData3;
@@ -163,11 +179,12 @@ else
     save(mdl31Path, 'Xtr3','Xte3','ytr','yte');
 end
 
-mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel);
+best_params_svm3 = finetuneSVM(Xtr3, ytr);
+mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, best_params_svm3.boxConstraint);
 yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
-%}
+
 %% ================= TASK 4 =================
 % As in previous tasks you need to implement trainTranferCNN and predictTransferCNN. 
 % You need to perform experiments demonstrating fine-tuning of the pretrained resnet18 network.

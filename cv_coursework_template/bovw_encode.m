@@ -16,7 +16,7 @@ function [features, labels] = bovw_encode(imds, imgSize, vocab, bovw_details)
         % duplicated from buildVocab
         [rows, cols] = size(img);
         [X, Y] = meshgrid(1:step:cols, 1:step:rows);
-        points = SURFPoints([X(:), Y(:)]);
+        points = SURFPoints([X(:), Y(:)], 'Scale', 4);
         
         [desc, ~] = extractFeatures(img, points, 'Method', 'SURF');
         desc = double(desc);

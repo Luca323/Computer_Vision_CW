@@ -1,6 +1,6 @@
 function bestParams = finetuneSVM(X, y)
 
-    boxContraints = [0.1 1 10];
+    boxContraints = [0.01 0.1 1 10 100];
     
     bestParams = struct();
     bestAcc = 0;
