@@ -127,8 +127,8 @@ mdl2 = trainKNN_2(Xtr2, ytr, best_params_knn.distance, best_params_knn.k);
 yhat2 = predict(mdl2, Xte2);
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
-%}
 
+%}
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.
 % As above you should include more parameters that you will need to define in config. 
@@ -158,6 +158,8 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
 % SURF features will look very different from a smaller version of the same
 % image.
 
+fprintf("Task 3")
+C.bovw.useColour = true;
 
 mdl3Path = fullfile(C.modelCacheDir, 'Task3_bovw_vocab.mat');
 if exist(mdl3Path, 'file')
@@ -179,8 +181,8 @@ else
     save(mdl31Path, 'Xtr3','Xte3','ytr','yte');
 end
 
-best_params_svm3 = finetuneSVM(Xtr3, ytr);
-mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, best_params_svm3.boxConstraint);
+
+mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, 0.01);
 yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
