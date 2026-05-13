@@ -28,6 +28,7 @@ C.cnn.epochs = 5;
 C.cnn.miniBatchSize = 16;
 C.cnn.initialLearnRate = 1e-4;
 C.cnn.l2 = 1e-4;
+C.cnn.freezeMode      = 'none';   
 
 C.resultsRoot = fullfile(baseDir, "results");
 if ~isfolder(C.resultsRoot), mkdir(C.resultsRoot); end
