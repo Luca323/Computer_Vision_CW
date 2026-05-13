@@ -4,16 +4,15 @@ numLayers = numel(layers);
 
 switch freezeMode
     case 'all'
-        % Freeze everything except the new head (last 2 layers)
+        %freeze everything except the last 2 layers
         freezeUpTo = numLayers - 2;
 
     case 'partial'
-        % Freeze roughly the first half (early low-level features)
-        % ResNet18 has ~71 layers; this freezes roughly the first two residual blocks
+        %freeze roughly the first half (early low-level features)
         freezeUpTo = round(numLayers * 0.5);
 
     case 'none'
-        % Fine-tune the whole network
+        %tune the whole network
         freezeUpTo = 0;
 
     otherwise
@@ -22,17 +21,15 @@ end
 for i = 1:freezeUpTo
     layer = layers(i);
 
-    % Freeze weights if available
+    %Freeze weights if available
     if isprop(layer,'WeightLearnRateFactor')
         layer.WeightLearnRateFactor = 0;
     end
 
-    % Freeze bias if available
     if isprop(layer,'BiasLearnRateFactor')
         layer.BiasLearnRateFactor = 0;
     end
 
-    % Replace updated layer back into graph
     lgraph = replaceLayer(lgraph, layer.Name, layer);
 end
 

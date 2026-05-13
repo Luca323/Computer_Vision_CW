@@ -1,7 +1,7 @@
 function vocab = bovw_buildVocab(imds, imgSize, bovw)
-    numWords   = bovw.numWords;
-    step       = bovw.stepSize;
-    useColour  = bovw.useColour;
+    numWords = bovw.numWords;
+    step = bovw.stepSize;
+    useColour = bovw.useColour;
     
     allDescriptors = {};
     numImgs = numel(imds.Files);
@@ -11,7 +11,7 @@ function vocab = bovw_buildVocab(imds, imgSize, bovw)
         img = imresize(img, imgSize);
         img = im2single(img);
 
-        % Define points FIRST
+        %define points
         [rows, cols] = size(img(:,:,1));
         [X, Y] = meshgrid(1:step:cols, 1:step:rows);
         pts = SURFPoints([X(:), Y(:)], 'Scale', 4);
@@ -20,7 +20,7 @@ function vocab = bovw_buildVocab(imds, imgSize, bovw)
             continue;
         end
 
-        % Extract descriptors
+        %extract descriptors
         if useColour && size(img, 3) == 3
             desc = [];
             for ch = 1:3
@@ -51,8 +51,9 @@ function vocab = bovw_buildVocab(imds, imgSize, bovw)
         error('No descriptors extracted - check images are loading correctly');
     end
 
+    %K-MEANS cluster extraction
     [~, vocab] = kmeans(allDescriptors, numWords, ...
         'Replicates', 1, ...
-        'MaxIter',    300, ...
-        'Display',    'final');
+        'MaxIter', 300, ...
+        'Display','final');
 end

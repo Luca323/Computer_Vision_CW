@@ -5,7 +5,7 @@ function [features, labels] = extractHOG(imds, imageSize, cellSize)
 
     sample = imread(imageFiles{1});
     sample = imresize(sample, imageSize);
-    sampleFeatures = extractHOGFeatures(sample, 'CellSize', [4 4]);
+    sampleFeatures = extractHOGFeatures(sample, 'CellSize', cellSize);
     numFeatures = length(sampleFeatures);
 
     features = zeros(numImages, numFeatures);
@@ -14,7 +14,7 @@ function [features, labels] = extractHOG(imds, imageSize, cellSize)
     for i = 2:numImages
         img = imread(imageFiles{i});
         img = imresize(img, imageSize);
-        hogFeatures = extractHOGFeatures(img, 'CellSize', cellSize);  % ← renamed
+        hogFeatures = extractHOGFeatures(img, 'CellSize', cellSize); 
         features(i, :) = hogFeatures;
     end
 end

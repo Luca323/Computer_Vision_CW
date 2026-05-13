@@ -9,14 +9,13 @@ function bestParams = finetuneSVM(X, y)
 
     classes = categories(y);
     numClasses = numel(classes);
-    %model.BinaryModels = cell(numClasses, 1);
-    %model.ClassNames = classes;
+
     
     for b = boxContraints
         
         foldAcc = zeros(cv.NumTestSets, 1);
         
-        % create folds
+        %K folds
         for fold = 1:cv.NumTestSets
             trainIdx = training(cv, fold);
             testIdx  = test(cv, fold);

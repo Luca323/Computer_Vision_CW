@@ -17,7 +17,7 @@ function bestParams = finetuneKNN(X, y)
             fprintf('k=%d, distance=%s, acc=%.4f\n', k, distances{d}, acc);
             
             if acc > bestAcc || (acc == bestAcc && k > bestParams.k)
-                bestAcc            = acc;   % ← fix
+                bestAcc            = acc;  
                 bestParams.acc     = acc;
                 bestParams.k       = k;
                 bestParams.distance = distances{d};

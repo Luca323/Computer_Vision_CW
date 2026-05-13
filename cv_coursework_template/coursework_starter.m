@@ -33,7 +33,7 @@ classes = C.classOrder;
 % you should not enable OptimizeHyperparameters (keep it disabled as it is by default).
 % Your fine-tuning should be done using cross-validation on a training set part of the dataset.
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
-%{
+
 fprintf('Task 1')
 [Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
@@ -69,20 +69,23 @@ end
 yhat1 = predictSVM(mdl1, Xte1);
 runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
 
-%}
+
 %% ================= TASK 2 =================
 % As in Task 1, you need to implement exctractHOG and trainSVM functions.
 % As above you should include more parameters. You should define them in config.
 
-%{
+
 fprintf('Task 2')
 fprintf('Extracting HOG Features...')
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
     load(mdl2Path,'Xtr2','Xte2','ytr','yte');
 else
+    %Manually tested cellSize with 4, 8, 16 and 32
+    C.hog.cellSize = [32 32];
+
     [Xtr2, ytr] = extractHOG(imdsTrain, C.imageSize, C.hog.cellSize);
-    [Xte2, yte] = extractHOG(imdsTest,  C.imageSize, C.hog.cellSize);
+    [Xte2, yte] = extractHOG(imdsTest,  C.imageSize, c.hog.cellSize);
     save(mdl2Path, 'Xtr2','Xte2','ytr','yte');
 end
 
@@ -128,7 +131,7 @@ yhat2 = predict(mdl2, Xte2);
 
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
 
-%}
+
 %% ================= TASK 3 =================
 % As in previous tasks you need to implement bovw_buildVocab and bovw_encode functions. You can use trainSVM developed for Task 2.
 % As above you should include more parameters that you will need to define in config. 
@@ -161,7 +164,7 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
 fprintf("Task 3")
 C.bovw.useColour = true;
 
-%{
+
 mdl3Path = fullfile(C.modelCacheDir, 'Task3_bovw_vocab.mat');
 if exist(mdl3Path, 'file')
     load(mdl3Path, 'vocab');
@@ -175,25 +178,25 @@ mdl31Path = fullfile(C.modelCacheDir, 'Task3_bovw_features.mat');
 
 if exist(mdl31Path, 'file')
     load(mdl31Path, 'Xtr3','Xte3','ytr','yte');
-    extrData3 = data3.extrData3;
 else
     [Xtr3,ytr] = bovw_encode(imdsTrain, C.imageSize, vocab, C.bovw);
     [Xte3,yte] = bovw_encode(imdsTest,  C.imageSize, vocab, C.bovw);
     save(mdl31Path, 'Xtr3','Xte3','ytr','yte');
 end
 
+%best_params = finetuneSVM(Xtr3, ytr);
 
-mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, 0.01);
+mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, 0.01); %this was finetuned earlier
 yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
-%}
+
 
 %% ================= TASK 4 =================
 % As in previous tasks you need to implement trainTranferCNN and predictTransferCNN. 
 % You need to perform experiments demonstrating fine-tuning of the pretrained resnet18 network.
 
-%% TASK 4
+
 freezeModes = {'all', 'partial', 'none'};
 
 for i = 1:numel(freezeModes)
@@ -203,26 +206,22 @@ for i = 1:numel(freezeModes)
     if exist(cachePath, 'file')
         load(cachePath, 'netStruct');
     else
-        netStruct = trainTransferCNN(imdsTrain, classes, C, mode);
+        netStruct = trainResNet(imdsTrain, classes, C, mode);
         save(cachePath, 'netStruct');
     end
 
-    yhat4 = predictTransferCNN(netStruct, imdsTest);
+    yhat4 = predictResNet(netStruct, imdsTest);
     yte   = imdsTest.Labels;
     label = sprintf('Task4_CNN_freeze_%s', mode);
     runFullEvaluation(imdsTest, yte, yhat4, classes, label, C.outDir);
 end
 
-%{
-netStruct = trainTransferCNN(imdsTrain, classes, C);
-yhat4 = predictTransferCNN(netStruct, imdsTest);
-yte = imdsTest.Labels;
-runFullEvaluation(imdsTest, yte, yhat4, classes, "Task4_TransferCNN", C.outDir);
-%}
+
+
 
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
-%{
+
 fprintf("Task 5")
 C.lbp = struct('numNeighbours', 24, 'radius', 3, 'upright', false);
 [Xtr5, ytr] = extractLBPfeatures(imdsTrain, C.imageSize, C.lbp);
@@ -232,7 +231,7 @@ mdl5 = TrainRandomForest(Xtr5, ytr);
 yhat5 = PredictRF(mdl5, Xte5);
 
 runFullEvaluation(imdsTest, yte, yhat5, classes, "Task5_LBP_RF", C.outDir);
-%}
+
 
 
 

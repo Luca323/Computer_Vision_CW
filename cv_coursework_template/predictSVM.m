@@ -7,7 +7,7 @@ function yhat = predictSVM(modelStruct, Xtest)
         currentModel = modelStruct.BinaryModels{i};
         [predLabels, binaryScore] = predict(currentModel, Xtest);
         
-        % Safely find which column corresponds to the positive class (label == 1)
+        %Safely find which column corresponds to the positive class
         posClassCol = find(currentModel.ClassNames == 1);
         scores(:, i) = binaryScore(:, posClassCol);
     end
