@@ -34,7 +34,7 @@ classes = C.classOrder;
 % Your fine-tuning should be done using cross-validation on a training set part of the dataset.
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
 
-fprintf('Task 1')
+fprintf('Task 1\n')
 [Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
 
@@ -75,7 +75,7 @@ runFullEvaluation(imdsTest, yte, yhat1, classes, "Task1_SVM", C.outDir);
 % As above you should include more parameters. You should define them in config.
 
 
-fprintf('Task 2')
+fprintf('\nTask 2\n')
 fprintf('Extracting HOG Features...')
 mdl2Path = fullfile(C.modelCacheDir, 'Task2_HOG_SVM_model.mat');
 if exist(mdl2Path, 'file')
@@ -119,12 +119,11 @@ fprintf("Evaluating...")
 mdl2 = trainSVM(Xtr2, ytr,C.svm.kernel, best_params_svm.boxConstraint);
 yhat2 = predictSVM(mdl2, Xte2); %Had to write custom prediction script
 
-
 runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_SVM", C.outDir);
 
 fprintf("Fine-Tuning KNN...")
 best_params_knn = finetuneKNN(Xtr2, ytr);
-disp(best_params_svm)
+disp(best_params_knn)
 
 mdl2 = trainKNN_2(Xtr2, ytr, best_params_knn.distance, best_params_knn.k);
 yhat2 = predict(mdl2, Xte2);
@@ -161,7 +160,7 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
 % SURF features will look very different from a smaller version of the same
 % image.
 
-fprintf("Task 3")
+fprintf("\nTask 3\n")
 C.bovw.useColour = true;
 
 
@@ -196,6 +195,7 @@ runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
 % As in previous tasks you need to implement trainTranferCNN and predictTransferCNN. 
 % You need to perform experiments demonstrating fine-tuning of the pretrained resnet18 network.
 
+fprintf('\nTask 4\n')
 
 freezeModes = {'all', 'partial', 'none'};
 
@@ -222,7 +222,7 @@ end
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
 
-fprintf("Task 5")
+fprintf("\nTask 5\n")
 C.lbp = struct('numNeighbours', 24, 'radius', 3, 'upright', false);
 [Xtr5, ytr] = extractLBPfeatures(imdsTrain, C.imageSize, C.lbp);
 [Xte5, yte] = extractLBPfeatures(imdsTest,  C.imageSize, C.lbp);
