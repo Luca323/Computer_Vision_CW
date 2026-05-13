@@ -1,37 +1,38 @@
-function cnnStruct = trainTransferCNN(imdsTrain, classes, cnn_params)
-    cnn_params = cnn_params.cnn;
+function cnnStruct = trainTransferCNN(imdsTrain, classes, C, freezeMode)
+    cnn_params = C.cnn;
     numClasses = numel(classes);
-    
+
     if strcmp(cnn_params.base, 'resnet18')
         net = resnet18;
     else
         error('Unknown network: %s', cnn_params.base);
     end
-    
+
     lgraph = layerGraph(net);
     inputSize = net.Layers(1).InputSize;
-    
+
+    % Replace final layers
     newFCLayer = fullyConnectedLayer(numClasses, ...
         'Name',                  'new_fc', ...
         'WeightLearnRateFactor', 10, ...
         'BiasLearnRateFactor',   10);
-    
     newClassLayer = classificationLayer('Name', 'new_output');
-    
     lgraph = replaceLayer(lgraph, 'fc1000', newFCLayer);
     lgraph = replaceLayer(lgraph, 'ClassificationLayer_predictions', newClassLayer);
-    
+
+    % Apply freezing based on mode
+    lgraph = applyFreezing(lgraph, freezeMode);
+
+    % Data prep
     [imdsTrainSplit, imdsVal] = splitEachLabel(imdsTrain, 0.8, 'randomized');
-    
     imageAugmenter = imageDataAugmenter( ...
         'RandXReflection',  true, ...
         'RandXTranslation', [-30 30], ...
         'RandYTranslation', [-30 30]);
-    
     augimdsTrain = augmentedImageDatastore(inputSize, imdsTrainSplit, ...
         'DataAugmentation', imageAugmenter);
-    augimdsVal   = augmentedImageDatastore(inputSize, imdsVal);
-    
+    augimdsVal = augmentedImageDatastore(inputSize, imdsVal);
+
     cnn_config = trainingOptions('sgdm', ...
         'MiniBatchSize',       cnn_params.miniBatchSize, ...
         'MaxEpochs',           cnn_params.epochs, ...
@@ -45,7 +46,8 @@ function cnnStruct = trainTransferCNN(imdsTrain, classes, cnn_params)
         'ValidationFrequency', 30, ...
         'Verbose',             true, ...
         'Plots',               'training-progress');
-    
-    cnnStruct.net       = trainNetwork(augimdsTrain, lgraph, cnn_config);
-    cnnStruct.inputSize = inputSize;
+
+    cnnStruct.net        = trainNetwork(augimdsTrain, lgraph, cnn_config);
+    cnnStruct.inputSize  = inputSize;
+    cnnStruct.freezeMode = freezeMode;
 end

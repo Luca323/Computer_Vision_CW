@@ -161,6 +161,7 @@ runFullEvaluation(imdsTest, yte, yhat2, classes, "Task2_HOG_KNN", C.outDir);
 fprintf("Task 3")
 C.bovw.useColour = true;
 
+%{
 mdl3Path = fullfile(C.modelCacheDir, 'Task3_bovw_vocab.mat');
 if exist(mdl3Path, 'file')
     load(mdl3Path, 'vocab');
@@ -186,12 +187,33 @@ mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, 0.01);
 yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
+%}
 
 %% ================= TASK 4 =================
 % As in previous tasks you need to implement trainTranferCNN and predictTransferCNN. 
 % You need to perform experiments demonstrating fine-tuning of the pretrained resnet18 network.
-%{
 
+%% TASK 4
+freezeModes = {'all', 'partial', 'none'};
+
+for i = 1:numel(freezeModes)
+    mode = freezeModes{i};
+    cachePath = fullfile(C.modelCacheDir, sprintf('Task4_CNN_%s.mat', mode));
+
+    if exist(cachePath, 'file')
+        load(cachePath, 'netStruct');
+    else
+        netStruct = trainTransferCNN(imdsTrain, classes, C, mode);
+        save(cachePath, 'netStruct');
+    end
+
+    yhat4 = predictTransferCNN(netStruct, imdsTest);
+    yte   = imdsTest.Labels;
+    label = sprintf('Task4_CNN_freeze_%s', mode);
+    runFullEvaluation(imdsTest, yte, yhat4, classes, label, C.outDir);
+end
+
+%{
 netStruct = trainTransferCNN(imdsTrain, classes, C);
 yhat4 = predictTransferCNN(netStruct, imdsTest);
 yte = imdsTest.Labels;
