@@ -33,7 +33,7 @@ classes = C.classOrder;
 % you should not enable OptimizeHyperparameters (keep it disabled as it is by default).
 % Your fine-tuning should be done using cross-validation on a training set part of the dataset.
 % Of course, you need to test your fine-tune model on the test set part of the dataset using the Matlab built in predict function.
-
+%{
 fprintf('Task 1\n')
 [Xtr1, ytr] = extractTinyImages_2(imdsTrain, C.thumbnailSize);
 [Xte1, yte] = extractTinyImages_2(imdsTest,  C.thumbnailSize);
@@ -85,7 +85,7 @@ else
     C.hog.cellSize = [32 32];
 
     [Xtr2, ytr] = extractHOG(imdsTrain, C.imageSize, C.hog.cellSize);
-    [Xte2, yte] = extractHOG(imdsTest,  C.imageSize, c.hog.cellSize);
+    [Xte2, yte] = extractHOG(imdsTest,  C.imageSize, C.hog.cellSize);
     save(mdl2Path, 'Xtr2','Xte2','ytr','yte');
 end
 
@@ -183,9 +183,8 @@ else
     save(mdl31Path, 'Xtr3','Xte3','ytr','yte');
 end
 
-%best_params = finetuneSVM(Xtr3, ytr);
-
-mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, 0.01); %this was finetuned earlier
+best_params3 = finetuneSVM(Xtr3, ytr);
+mdl3 = trainSVM(Xtr3, ytr, C.svm.kernel, best_params3.boxConstraint);
 yhat3 = predictSVM(mdl3, Xte3);
 
 runFullEvaluation(imdsTest, yte, yhat3, classes, "Task3_BoVW_SVM", C.outDir);
@@ -216,22 +215,26 @@ for i = 1:numel(freezeModes)
     runFullEvaluation(imdsTest, yte, yhat4, classes, label, C.outDir);
 end
 
-
+%}
 
 
 %% ================= TASK 5 =================
 % This one is up to you as described in coursework brief.
 
 fprintf("\nTask 5\n")
-C.lbp = struct('numNeighbours', 24, 'radius', 3, 'upright', false);
-[Xtr5, ytr] = extractLBPfeatures(imdsTrain, C.imageSize, C.lbp);
-[Xte5, yte] = extractLBPfeatures(imdsTest,  C.imageSize, C.lbp);
 
-mdl5 = TrainRandomForest(Xtr5, ytr);
-yhat5 = PredictRF(mdl5, Xte5);
-
-runFullEvaluation(imdsTest, yte, yhat5, classes, "Task5_LBP_RF", C.outDir);
-
+%Parameter grid search
+for r = [1, 2, 3]
+    for n = [8, 16, 24]
+        C.lbp = struct('numNeighbours', n, 'radius', r, 'upright', false);
+        [Xtr5, ytr] = extractLBPfeatures(imdsTrain, C.imageSize, C.lbp);
+        [Xte5, yte] = extractLBPfeatures(imdsTest,  C.imageSize, C.lbp);
+        mdl5  = TrainRandomForest(Xtr5, ytr);
+        yhat5 = PredictRF(mdl5, Xte5);
+        acc   = sum(yhat5 == yte) / numel(yte);
+        fprintf('r=%d, n=%d, acc=%.4f\n', r, n, acc);
+    end
+end
 
 
 
